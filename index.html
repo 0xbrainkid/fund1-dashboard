@@ -214,10 +214,9 @@ function buildSeededState() {
   return s;
 }
 
-let state = loadState();
-// Always rebuild from seed to stay in sync
-state = buildSeededState();
-saveState();
+// Always use seed data as source of truth
+localStorage.removeItem('braintrade_fund1_v1');
+let state = buildSeededState();
 
 function defaultState() {
   return {
