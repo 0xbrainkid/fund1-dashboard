@@ -21,7 +21,7 @@ body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira 
 .header .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-.stats-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); }
+.stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); }
 .stat-card { background: var(--card); padding: 20px; text-align: center; }
 .stat-card .label { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
 .stat-card .value { font-size: 28px; font-weight: 700; }
@@ -65,7 +65,7 @@ canvas { width: 100%; height: 100%; }
   body { font-size: 12px; }
   .header { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
   .header h1 { font-size: 13px; }
-  .stats-row { grid-template-columns: repeat(3, 1fr); }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
   .stat-card { padding: 12px 8px; }
   .stat-card .value { font-size: 20px; }
   .stat-card .label { font-size: 9px; }
@@ -105,16 +105,11 @@ canvas { width: 100%; height: 100%; }
     <div class="label">Total P&L</div>
     <div class="value" id="total-pnl">$0.00</div>
     <div class="sub" id="pnl-pct">0.00%</div>
-  </div>
-  <div class="stat-card" style="border-left:2px solid var(--purple)">
-    <div class="label">H — P&L</div>
-    <div class="value" id="h-pnl" style="font-size:22px">$0.00</div>
-    <div class="sub" id="h-pnl-pct">50% share</div>
-  </div>
-  <div class="stat-card" style="border-left:2px solid var(--blue)">
-    <div class="label">K — P&L</div>
-    <div class="value" id="k-pnl" style="font-size:22px">$0.00</div>
-    <div class="sub" id="k-pnl-pct">50% share</div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+      <div style="text-align:center"><div style="color:var(--purple);font-size:9px;letter-spacing:1px;margin-bottom:2px">H</div><div id="h-pnl" style="font-size:14px;font-weight:700">$0.00</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="color:var(--blue);font-size:9px;letter-spacing:1px;margin-bottom:2px">K</div><div id="k-pnl" style="font-size:14px;font-weight:700">$0.00</div></div>
+    </div>
   </div>
   <div class="stat-card">
     <div class="label">Total Trades</div>
