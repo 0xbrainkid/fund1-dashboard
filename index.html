@@ -292,7 +292,7 @@ function render() {
         <div class="trade-left">
           <span class="trade-coin">${t.coin}</span>
           <span class="tag ${t.side==='LONG'?'tag-long':'tag-short'}">${t.side}</span>
-          <span class="trade-meta">${fmtDate(t.opened)} · ${fmtUsd(t.entry)} → ${fmtUsd(t.exit)}</span>
+          <span class="trade-meta">${fmtDate(t.opened)} · ${(t.size/t.entry).toFixed(4)} BTC · ${fmtUsd(t.entry)} → ${fmtUsd(t.exit)}</span>
         </div>
         <div class="trade-right">
           <span class="trade-pnl ${t.pnl>=0?'positive':'negative'}">${fmtPnl(t.pnl)}</span>
