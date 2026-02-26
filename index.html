@@ -177,7 +177,37 @@ const API = 'https://api.hyperliquid.xyz';
 const STARTING_CAPITAL = 200000;
 const STORAGE_KEY = 'braintrade_fund1_v1';
 
+// Seed trades — hardcoded from chat
+const SEED_TRADES = [
+  {
+    id: 1,
+    coin: 'BTC', side: 'LONG', size: 99750, leverage: 1,
+    entryPrice: 66500, exitPrice: 68000,
+    openedAt: new Date('2026-02-20T10:00:00Z').getTime(),
+    closedAt: new Date('2026-02-20T18:00:00Z').getTime(),
+    pnl: 1500 * 1.5, // (68000-66500) * 1.5 BTC = $2,250
+    result: 'WIN'
+  }
+];
+
+function buildSeededState() {
+  const s = defaultState();
+  s.closedTrades = [...SEED_TRADES];
+  let runningCapital = STARTING_CAPITAL;
+  // Build equity curve from trades
+  s.equityCurve = [{t: new Date('2026-02-20T00:00:00Z').getTime(), v: STARTING_CAPITAL}];
+  SEED_TRADES.forEach(t => {
+    runningCapital += t.pnl;
+    s.equityCurve.push({t: t.closedAt, v: runningCapital});
+  });
+  s.capital = runningCapital;
+  return s;
+}
+
 let state = loadState();
+// Always rebuild from seed to stay in sync
+state = buildSeededState();
+saveState();
 
 function defaultState() {
   return {
