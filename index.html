@@ -185,7 +185,16 @@ const SEED_TRADES = [
     entryPrice: 66500, exitPrice: 68000,
     openedAt: new Date('2026-02-20T10:00:00Z').getTime(),
     closedAt: new Date('2026-02-20T18:00:00Z').getTime(),
-    pnl: 1500 * 1.5, // (68000-66500) * 1.5 BTC = $2,250
+    pnl: 2250, // (68000-66500) * 1.5 BTC
+    result: 'WIN'
+  },
+  {
+    id: 2,
+    coin: 'BTC', side: 'LONG', size: 96750, leverage: 1,
+    entryPrice: 64500, exitPrice: 68000,
+    openedAt: new Date('2026-02-25T10:00:00Z').getTime(),
+    closedAt: new Date('2026-02-25T18:00:00Z').getTime(),
+    pnl: 5250, // (68000-64500) * 1.5 BTC
     result: 'WIN'
   }
 ];
