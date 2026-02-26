@@ -110,8 +110,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 </div>
 
 <div class="hero">
-  <div class="hero-label">Total Profit & Loss</div>
-  <div class="hero-value positive" id="total-pnl">+$7,500.00</div>
+  <div class="hero-label">Trading Capital: $200,000</div>
+  <div class="hero-value positive" id="total-pnl">+$7,500</div>
   <div class="hero-pct positive" id="pnl-pct">+3.75% return</div>
   <div class="hero-split">
     <div class="hero-split-item">
@@ -126,11 +126,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 </div>
 
 <div class="stats-scroll">
-  <div class="pill">
-    <div class="pill-label">Capital</div>
-    <div class="pill-value">$200K</div>
-    <div class="pill-sub">Fixed</div>
-  </div>
   <div class="pill">
     <div class="pill-label">Trades</div>
     <div class="pill-value" id="total-trades">2</div>
@@ -224,8 +219,8 @@ async function hlPost(p) {
   return r.json();
 }
 
-const fmt = (n,d=2) => Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const fmtPnl = n => (n>=0?'+':'')+' $'+fmt(Math.abs(n));
+const fmt = (n,d=0) => Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtPnl = n => (n>=0?'+':'')+'$'+fmt(Math.abs(n));
 const fmtUsd = n => '$'+fmt(n);
 const fmtK = n => '$'+(n/1000).toFixed(1)+'K';
 const fmtDate = ts => new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
@@ -253,7 +248,7 @@ function render() {
   pnlEl.textContent = fmtPnl(total);
   pnlEl.className = 'hero-value '+(total>=0?'positive':'negative');
 
-  document.getElementById('pnl-pct').textContent = (total>=0?'+':'')+fmt(total/CAP*100)+'% return';
+  document.getElementById('pnl-pct').textContent = (total>=0?'+':'')+(total/CAP*100).toFixed(2)+'% return';
   document.getElementById('pnl-pct').className = 'hero-pct '+(total>=0?'positive':'negative');
 
   const hEl = document.getElementById('h-pnl');
