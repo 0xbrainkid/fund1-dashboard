@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>💀 brainTrade — Paper Trading</title>
+<style>
+:root {
+  --bg: #0a0e17; --card: #111827; --border: #1f2937;
+  --text: #e5e7eb; --dim: #6b7280; --green: #10b981;
+  --red: #ef4444; --blue: #3b82f6; --yellow: #f59e0b;
+  --purple: #8b5cf6;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.header h1 { font-size: 16px; letter-spacing: 1px; }
+.header h1 span { color: var(--purple); }
+.header .badge { background: var(--yellow); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-left: 8px; }
+.header .live { display: flex; align-items: center; gap: 6px; color: var(--green); font-size: 11px; }
+.header .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); }
+.stat-card { background: var(--card); padding: 20px; text-align: center; }
+.stat-card .label { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.stat-card .value { font-size: 28px; font-weight: 700; }
+.stat-card .sub { color: var(--dim); font-size: 11px; margin-top: 4px; }
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.neutral { color: var(--dim); }
+
+.grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1px; background: var(--border); }
+.card { background: var(--card); padding: 16px; }
+.card-title { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.full { grid-column: 1 / -1; }
+
+table { width: 100%; border-collapse: collapse; }
+th { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
+td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 12px; }
+tr:hover { background: rgba(255,255,255,0.02); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.tag-long { background: rgba(16,185,129,0.15); color: var(--green); }
+.tag-short { background: rgba(239,68,68,0.15); color: var(--red); }
+.tag-open { background: rgba(59,130,246,0.15); color: var(--blue); }
+.tag-won { background: rgba(16,185,129,0.15); color: var(--green); }
+.tag-lost { background: rgba(239,68,68,0.15); color: var(--red); }
+
+.equity-chart { position: relative; height: 200px; }
+canvas { width: 100%; height: 100%; }
+
+.controls { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--card); }
+.controls input, .controls select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 4px; font-family: inherit; font-size: 12px; }
+.controls button { background: var(--purple); color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-family: inherit; font-size: 12px; cursor: pointer; font-weight: 600; }
+.controls button:hover { opacity: 0.9; }
+.controls button.danger { background: var(--red); }
+.controls button.success { background: var(--green); }
+
+.footer { padding: 8px 20px; border-top: 1px solid var(--border); color: var(--dim); font-size: 10px; display: flex; justify-content: space-between; }
+
+.pnl-bar { height: 4px; border-radius: 2px; margin-top: 4px; }
+.empty-state { color: var(--dim); text-align: center; padding: 40px; font-size: 12px; }
+
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: repeat(3, 1fr); }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>💀 <span>brainTrade</span> — Paper Trading <span class="badge">PAPER</span></h1>
+  <div class="live"><div class="dot"></div> LIVE <span id="last-update" style="color: var(--dim); margin-left: 8px;"></span></div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="label">Portfolio Value</div>
+    <div class="value" id="portfolio-value">$200,000.00</div>
+    <div class="sub" id="portfolio-change">Starting Capital</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Total P&L</div>
+    <div class="value" id="total-pnl">$0.00</div>
+    <div class="sub" id="pnl-pct">0.00%</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Total Trades</div>
+    <div class="value" id="total-trades">0</div>
+    <div class="sub" id="trades-sub">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Active Trades</div>
+    <div class="value" id="active-trades">0</div>
+    <div class="sub" id="active-exposure">$0 exposed</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Win Rate</div>
+    <div class="value" id="win-rate">—</div>
+    <div class="sub" id="win-loss">0W / 0L</div>
+  </div>
+</div>
+
+<div class="controls">
+  <select id="trade-coin">
+    <option value="BTC">BTC</option>
+    <option value="ETH">ETH</option>
+    <option value="SOL">SOL</option>
+    <option value="DOGE">DOGE</option>
+    <option value="XRP">XRP</option>
+    <option value="LINK">LINK</option>
+    <option value="ARB">ARB</option>
+    <option value="AVAX">AVAX</option>
+    <option value="MATIC">MATIC</option>
+    <option value="OP">OP</option>
+  </select>
+  <select id="trade-side">
+    <option value="LONG">LONG</option>
+    <option value="SHORT">SHORT</option>
+  </select>
+  <input type="number" id="trade-size" placeholder="Size (USDC)" value="5000" style="width:120px">
+  <select id="trade-leverage">
+    <option value="1">1x</option>
+    <option value="2">2x</option>
+    <option value="3">3x</option>
+    <option value="5">5x</option>
+    <option value="10" selected>10x</option>
+    <option value="20">20x</option>
+  </select>
+  <input type="number" id="trade-sl" placeholder="SL %" value="2" style="width:80px">
+  <input type="number" id="trade-tp" placeholder="TP %" value="4" style="width:80px">
+  <button onclick="openTrade()">Open Trade</button>
+  <button class="danger" onclick="closeAllTrades()">Close All</button>
+  <button onclick="resetAccount()" style="background:var(--dim)">Reset</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-title">Equity Curve <span id="chart-period" style="color:var(--blue);cursor:pointer" onclick="toggleChartPeriod()">ALL</span></div>
+    <div class="equity-chart">
+      <canvas id="equity-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Performance Breakdown</div>
+    <div id="perf-breakdown">
+      <table>
+        <thead><tr><th>Coin</th><th>Trades</th><th>Win%</th><th>P&L</th></tr></thead>
+        <tbody id="perf-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card full">
+    <div class="card-title">Active Positions <span id="active-count" style="color:var(--blue)"></span></div>
+    <table>
+      <thead><tr><th>Time</th><th>Coin</th><th>Side</th><th>Size</th><th>Leverage</th><th>Entry</th><th>Mark</th><th>uPnL</th><th>SL</th><th>TP</th><th>Action</th></tr></thead>
+      <tbody id="active-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card full">
+    <div class="card-title">Trade History <span id="history-count" style="color:var(--dim)"></span></div>
+    <div style="max-height:300px;overflow-y:auto">
+      <table>
+        <thead><tr><th>Opened</th><th>Closed</th><th>Coin</th><th>Side</th><th>Size</th><th>Entry</th><th>Exit</th><th>P&L</th><th>Result</th></tr></thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>💀 brainTrade Paper Trading | Starting Capital: $200,000</span>
+  <span>Prices from Hyperliquid API | Auto-refreshes every 3s</span>
+</div>
+
+<script>
+const API = 'https://api.hyperliquid.xyz';
+const STARTING_CAPITAL = 200000;
+const STORAGE_KEY = 'braintrade_paper_v1';
+
+let state = loadState();
+
+function defaultState() {
+  return {
+    capital: STARTING_CAPITAL,
+    trades: [],
+    closedTrades: [],
+    equityCurve: [{t: Date.now(), v: STARTING_CAPITAL}]
+  };
+}
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+async function hlPost(payload) {
+  const r = await fetch(API + '/info', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  return r.json();
+}
+
+function fmt(n, d=2) { return Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d}); }
+function fmtUsd(n) { return '$' + fmt(n); }
+function fmtPnl(n) { const v = Number(n); return (v>=0?'+':'') + '$' + fmt(v); }
+function fmtTime(ts) { return new Date(ts).toLocaleString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+let prices = {};
+
+async function fetchPrices() {
+  try {
+    const mids = await hlPost({type:'allMids'});
+    prices = {};
+    for (const [k,v] of Object.entries(mids)) {
+      prices[k] = Number(v);
+    }
+  } catch(e) { console.error('Price fetch error:', e); }
+}
+
+function calcPnl(trade, markPrice) {
+  const dir = trade.side === 'LONG' ? 1 : -1;
+  const pctMove = (markPrice - trade.entryPrice) / trade.entryPrice * dir;
+  return pctMove * trade.size * trade.leverage;
+}
+
+function checkSLTP(trade, markPrice) {
+  const dir = trade.side === 'LONG' ? 1 : -1;
+  const pctMove = (markPrice - trade.entryPrice) / trade.entryPrice * dir * 100;
+  if (trade.sl && pctMove <= -trade.sl) return 'SL';
+  if (trade.tp && pctMove >= trade.tp) return 'TP';
+  return null;
+}
+
+async function openTrade() {
+  const coin = document.getElementById('trade-coin').value;
+  const side = document.getElementById('trade-side').value;
+  const size = Number(document.getElementById('trade-size').value);
+  const leverage = Number(document.getElementById('trade-leverage').value);
+  const sl = Number(document.getElementById('trade-sl').value);
+  const tp = Number(document.getElementById('trade-tp').value);
+
+  if (!prices[coin]) { alert('No price for ' + coin); return; }
+  if (size <= 0) { alert('Invalid size'); return; }
+
+  const totalExposure = state.trades.reduce((s,t) => s + t.size, 0) + size;
+  if (totalExposure > state.capital) { alert('Insufficient capital'); return; }
+
+  state.trades.push({
+    id: Date.now(),
+    coin, side, size, leverage,
+    entryPrice: prices[coin],
+    sl, tp,
+    openedAt: Date.now()
+  });
+  saveState();
+  render();
+}
+
+function closeTrade(id, exitPrice) {
+  const idx = state.trades.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  const trade = state.trades.splice(idx, 1)[0];
+  const mark = exitPrice || prices[trade.coin] || trade.entryPrice;
+  const pnl = calcPnl(trade, mark);
+  state.capital += pnl;
+  state.closedTrades.unshift({
+    ...trade,
+    exitPrice: mark,
+    pnl,
+    closedAt: Date.now(),
+    result: pnl >= 0 ? 'WIN' : 'LOSS'
+  });
+  state.equityCurve.push({t: Date.now(), v: state.capital + getUnrealizedPnl()});
+  saveState();
+  render();
+}
+
+function closeAllTrades() {
+  if (!state.trades.length) return;
+  if (!confirm('Close all ' + state.trades.length + ' positions?')) return;
+  [...state.trades].forEach(t => closeTrade(t.id));
+}
+
+function resetAccount() {
+  if (!confirm('Reset paper account to $200,000? All history will be lost.')) return;
+  state = defaultState();
+  saveState();
+  render();
+}
+
+function getUnrealizedPnl() {
+  return state.trades.reduce((s, t) => {
+    const mark = prices[t.coin] || t.entryPrice;
+    return s + calcPnl(t, mark);
+  }, 0);
+}
+
+function render() {
+  const unrealizedPnl = getUnrealizedPnl();
+  const realizedPnl = state.capital - STARTING_CAPITAL;
+  const totalPnl = realizedPnl + unrealizedPnl;
+  const portfolioValue = state.capital + unrealizedPnl;
+  const totalTradeCount = state.trades.length + state.closedTrades.length;
+  const wins = state.closedTrades.filter(t => t.pnl >= 0).length;
+  const losses = state.closedTrades.filter(t => t.pnl < 0).length;
+  const winRate = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
+  const exposure = state.trades.reduce((s,t) => s + t.size, 0);
+
+  // Stats
+  const pvEl = document.getElementById('portfolio-value');
+  pvEl.textContent = fmtUsd(portfolioValue);
+  pvEl.className = 'value ' + (portfolioValue >= STARTING_CAPITAL ? 'positive' : 'negative');
+
+  const pcEl = document.getElementById('portfolio-change');
+  const pctChg = ((portfolioValue - STARTING_CAPITAL) / STARTING_CAPITAL * 100);
+  pcEl.textContent = (pctChg >= 0 ? '▲' : '▼') + ' ' + fmt(Math.abs(pctChg)) + '% from start';
+  pcEl.className = 'sub ' + (pctChg >= 0 ? 'positive' : 'negative');
+
+  const pnlEl = document.getElementById('total-pnl');
+  pnlEl.textContent = fmtPnl(totalPnl);
+  pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
+  document.getElementById('pnl-pct').textContent = (totalPnl >= 0 ? '+' : '') + fmt(totalPnl / STARTING_CAPITAL * 100) + '%';
+
+  document.getElementById('total-trades').textContent = totalTradeCount;
+  document.getElementById('trades-sub').textContent = state.closedTrades.length + ' closed';
+
+  document.getElementById('active-trades').textContent = state.trades.length;
+  document.getElementById('active-exposure').textContent = fmtUsd(exposure) + ' exposed';
+
+  const wrEl = document.getElementById('win-rate');
+  wrEl.textContent = (wins + losses) > 0 ? fmt(winRate, 0) + '%' : '—';
+  wrEl.className = 'value ' + (winRate >= 50 ? 'positive' : winRate > 0 ? 'negative' : '');
+  document.getElementById('win-loss').textContent = wins + 'W / ' + losses + 'L';
+
+  // Active positions
+  const activeBody = document.getElementById('active-body');
+  document.getElementById('active-count').textContent = state.trades.length ? '(' + state.trades.length + ')' : '';
+  if (!state.trades.length) {
+    activeBody.innerHTML = '<tr><td colspan="11" class="empty-state">No active positions</td></tr>';
+  } else {
+    activeBody.innerHTML = state.trades.map(t => {
+      const mark = prices[t.coin] || t.entryPrice;
+      const pnl = calcPnl(t, mark);
+      const pnlClass = pnl >= 0 ? 'positive' : 'negative';
+      const sideClass = t.side === 'LONG' ? 'tag-long' : 'tag-short';
+      const dir = t.side === 'LONG' ? 1 : -1;
+      const slPrice = t.sl ? t.entryPrice * (1 - t.sl/100 * dir) : '—';
+      const tpPrice = t.tp ? t.entryPrice * (1 + t.tp/100 * dir) : '—';
+      return `<tr>
+        <td style="color:var(--dim)">${fmtTime(t.openedAt)}</td>
+        <td><strong>${t.coin}</strong></td>
+        <td><span class="tag ${sideClass}">${t.side}</span></td>
+        <td>${fmtUsd(t.size)}</td>
+        <td>${t.leverage}x</td>
+        <td>${fmtUsd(t.entryPrice)}</td>
+        <td>${fmtUsd(mark)}</td>
+        <td class="${pnlClass}"><strong>${fmtPnl(pnl)}</strong></td>
+        <td style="color:var(--red)">${typeof slPrice === 'number' ? fmtUsd(slPrice) : slPrice}</td>
+        <td style="color:var(--green)">${typeof tpPrice === 'number' ? fmtUsd(tpPrice) : tpPrice}</td>
+        <td><button onclick="closeTrade(${t.id})" style="background:var(--red);color:#fff;border:none;padding:3px 10px;border-radius:3px;cursor:pointer;font-size:11px">Close</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // History
+  const histBody = document.getElementById('history-body');
+  document.getElementById('history-count').textContent = state.closedTrades.length ? '(' + state.closedTrades.length + ')' : '';
+  if (!state.closedTrades.length) {
+    histBody.innerHTML = '<tr><td colspan="9" class="empty-state">No trade history yet</td></tr>';
+  } else {
+    histBody.innerHTML = state.closedTrades.slice(0, 50).map(t => {
+      const pnlClass = t.pnl >= 0 ? 'positive' : 'negative';
+      const resultClass = t.result === 'WIN' ? 'tag-won' : 'tag-lost';
+      const sideClass = t.side === 'LONG' ? 'tag-long' : 'tag-short';
+      return `<tr>
+        <td style="color:var(--dim)">${fmtTime(t.openedAt)}</td>
+        <td style="color:var(--dim)">${fmtTime(t.closedAt)}</td>
+        <td><strong>${t.coin}</strong></td>
+        <td><span class="tag ${sideClass}">${t.side}</span></td>
+        <td>${fmtUsd(t.size)}</td>
+        <td>${fmtUsd(t.entryPrice)}</td>
+        <td>${fmtUsd(t.exitPrice)}</td>
+        <td class="${pnlClass}"><strong>${fmtPnl(t.pnl)}</strong></td>
+        <td><span class="tag ${resultClass}">${t.result}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Performance breakdown
+  const perfBody = document.getElementById('perf-body');
+  const byCoins = {};
+  state.closedTrades.forEach(t => {
+    if (!byCoins[t.coin]) byCoins[t.coin] = {trades:0, wins:0, pnl:0};
+    byCoins[t.coin].trades++;
+    if (t.pnl >= 0) byCoins[t.coin].wins++;
+    byCoins[t.coin].pnl += t.pnl;
+  });
+  const coinEntries = Object.entries(byCoins).sort((a,b) => b[1].pnl - a[1].pnl);
+  if (!coinEntries.length) {
+    perfBody.innerHTML = '<tr><td colspan="4" class="empty-state">No data yet</td></tr>';
+  } else {
+    perfBody.innerHTML = coinEntries.map(([coin, d]) => {
+      const wr = (d.wins / d.trades * 100).toFixed(0);
+      const pnlClass = d.pnl >= 0 ? 'positive' : 'negative';
+      return `<tr><td><strong>${coin}</strong></td><td>${d.trades}</td><td>${wr}%</td><td class="${pnlClass}">${fmtPnl(d.pnl)}</td></tr>`;
+    }).join('');
+  }
+
+  // Equity chart
+  drawEquityChart();
+
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+}
+
+function drawEquityChart() {
+  const canvas = document.getElementById('equity-chart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 200 * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = '200px';
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = 200;
+
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(0, 0, W, H);
+
+  const curve = [...state.equityCurve];
+  const currentVal = state.capital + getUnrealizedPnl();
+  curve.push({t: Date.now(), v: currentVal});
+
+  if (curve.length < 2) return;
+
+  const values = curve.map(p => p.v);
+  const maxV = Math.max(...values, STARTING_CAPITAL * 1.01);
+  const minV = Math.min(...values, STARTING_CAPITAL * 0.99);
+  const range = maxV - minV || 1;
+  const pad = 50;
+
+  const toX = (i) => pad + (i / (curve.length - 1)) * (W - pad - 10);
+  const toY = (v) => 10 + (1 - (v - minV) / range) * (H - 20);
+
+  // Starting capital line
+  ctx.strokeStyle = '#374151';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(pad, toY(STARTING_CAPITAL));
+  ctx.lineTo(W, toY(STARTING_CAPITAL));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '9px monospace';
+  ctx.fillText('$200K', 2, toY(STARTING_CAPITAL) + 3);
+
+  // Grid
+  for (let i = 0; i < 4; i++) {
+    const y = 10 + i * (H - 20) / 3;
+    const val = maxV - (i / 3) * range;
+    ctx.strokeStyle = '#1f2937';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText('$' + (val/1000).toFixed(1) + 'K', 2, y + 3);
+  }
+
+  // Equity line
+  const isProfit = currentVal >= STARTING_CAPITAL;
+  ctx.strokeStyle = isProfit ? '#10b981' : '#ef4444';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  curve.forEach((p, i) => {
+    const x = toX(i), y = toY(p.v);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Fill under
+  ctx.lineTo(toX(curve.length - 1), H);
+  ctx.lineTo(toX(0), H);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, isProfit ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Current value dot
+  const lastX = toX(curve.length - 1);
+  const lastY = toY(currentVal);
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = isProfit ? '#10b981' : '#ef4444';
+  ctx.fill();
+}
+
+async function tick() {
+  await fetchPrices();
+
+  // Check SL/TP
+  [...state.trades].forEach(t => {
+    const mark = prices[t.coin];
+    if (!mark) return;
+    const hit = checkSLTP(t, mark);
+    if (hit) closeTrade(t.id, mark);
+  });
+
+  // Update equity curve periodically (every 5 min)
+  const lastPoint = state.equityCurve[state.equityCurve.length - 1];
+  if (Date.now() - lastPoint.t > 300000) {
+    state.equityCurve.push({t: Date.now(), v: state.capital + getUnrealizedPnl()});
+    if (state.equityCurve.length > 2000) state.equityCurve = state.equityCurve.slice(-1000);
+    saveState();
+  }
+
+  render();
+}
+
+tick();
+setInterval(tick, 3000);
+window.addEventListener('resize', render);
+</script>
+</body>
+</html>
