@@ -207,11 +207,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <div class="analysis" id="daily-analysis">
   <div class="analysis-header">
     <div class="analysis-title">🧠 Daily BTC Analysis</div>
-    <div class="analysis-date" id="analysis-date">Mar 06, 2026 · 2:00 PM UTC</div>
+    <div class="analysis-date" id="analysis-date">Mar 06, 2026 · 2:43 PM UTC</div>
   </div>
   <div class="analysis-body">
-    <div class="analysis-price" id="analysis-price">$69,354</div>
-    <div class="analysis-bias bias-bearish">🔴 BEARISH — REJECTION AT $72K + EXTREME FEAR BREAKDOWN</div>
+    <div class="analysis-price" id="analysis-price">$68,793</div>
+    <div class="analysis-bias bias-bearish">🎯 TARGET HIT — SHORT FROM $71.7K → $68.8K (+$832 PROFIT)</div>
 
     <div class="analysis-section">
       <div class="analysis-section-title">The Setup</div>
@@ -281,7 +281,11 @@ const TRADES = [
   { id:3, coin:'BTC', side:'LONG', size:65500, lev:1, entry:65500, exit:68000,
     opened: new Date('2026-03-02T14:00:00Z').getTime(),
     closed: new Date('2026-03-02T17:00:00Z').getTime(),
-    pnl: 2500, result:'WIN' }
+    pnl: 2500, result:'WIN' },
+  { id:4, coin:'BTC', side:'SHORT', size:200, lev:10, entry:71773, exit:68793,
+    opened: new Date('2026-03-04T12:00:00Z').getTime(),
+    closed: new Date('2026-03-06T14:43:00Z').getTime(),
+    pnl: 832, result:'WIN' }
 ];
 
 const activeTrades = [];
