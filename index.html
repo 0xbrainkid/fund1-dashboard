@@ -284,7 +284,10 @@ const TRADES = [
     pnl: 2500, result:'WIN' }
 ];
 
-const activeTrades = [];
+const activeTrades = [
+  { id:4, coin:'BTC', side:'LONG', size:70000, lev:1, entry:70000,
+    opened: new Date('2026-03-13T06:00:00Z').getTime() }
+];
 let prices = {};
 
 function buildCurve() {
