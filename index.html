@@ -281,13 +281,16 @@ const TRADES = [
   { id:3, coin:'BTC', side:'LONG', size:65500, lev:1, entry:65500, exit:68000,
     opened: new Date('2026-03-02T14:00:00Z').getTime(),
     closed: new Date('2026-03-02T17:00:00Z').getTime(),
+    pnl: 2500, result:'WIN' },
+  { id:4, coin:'BTC', side:'LONG', size:70000, lev:1, entry:70000, exit:72500,
+    opened: new Date('2026-03-13T06:00:00Z').getTime(),
+    closed: new Date('2026-03-13T14:51:00Z').getTime(),
     pnl: 2500, result:'WIN' }
 ];
 
-const activeTrades = [
-  { id:4, coin:'BTC', side:'LONG', size:70000, lev:1, entry:70000,
-    opened: new Date('2026-03-13T06:00:00Z').getTime() }
-];
+const activeTrades = [];
+
+// Closed trade: 1 BTC LONG $70,000 → $72,500 = +$2,500
 let prices = {};
 
 function buildCurve() {
