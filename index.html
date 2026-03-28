@@ -275,7 +275,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 
 <script>
 const API = 'https://api.hyperliquid.xyz';
-const CAP = 200000;
+const CAP = 400000;
 
 const TRADES = [
   { id:1, coin:'BTC', side:'LONG', size:99750, lev:1, entry:66500, exit:68000,
@@ -300,7 +300,10 @@ const TRADES = [
     pnl: 500, result:'WIN' }
 ];
 
-const activeTrades = [];
+const activeTrades = [
+  { id:6, coin:'BTC', side:'LONG', size:65800, lev:1, entry:65800,
+    opened: new Date('2026-03-28T06:10:00Z').getTime() }
+];
 let prices = {};
 
 function buildCurve() {
