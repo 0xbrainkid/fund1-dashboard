@@ -154,8 +154,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <div class="stats-scroll">
   <div class="pill">
     <div class="pill-label">Trades</div>
-    <div class="pill-value" id="total-trades">2</div>
-    <div class="pill-sub" id="trades-sub">2 closed</div>
+    <div class="pill-value" id="total-trades">13</div>
+    <div class="pill-sub" id="trades-sub">12 closed</div>
   </div>
   <div class="pill">
     <div class="pill-label">Win Rate</div>
@@ -164,8 +164,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   </div>
   <div class="pill">
     <div class="pill-label">Active</div>
-    <div class="pill-value" id="active-trades">0</div>
-    <div class="pill-sub" id="active-exposure">$0 exposed</div>
+    <div class="pill-value" id="active-trades">1</div>
+    <div class="pill-sub" id="active-exposure">$113,100 exposed</div>
   </div>
   <div class="pill">
     <div class="pill-label">Ann. Return</div>
@@ -327,7 +327,10 @@ const TRADES = [
     pnl: 800, result:'WIN' }
 ];
 
-const activeTrades = [];
+const activeTrades = [
+  { id:13, coin:'BTC', side:'LONG', size:113100, lev:1, entry:75400,
+    opened: new Date('2026-05-23T06:17:00Z').getTime() }
+];
 let prices = {};
 
 function buildCurve() {
