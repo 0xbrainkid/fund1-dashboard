@@ -329,16 +329,20 @@ const TRADES = [
   { id:13, coin:'BTC', side:'LONG', size:112500, lev:1, entry:75000, exit:76600,
     opened: new Date('2026-05-23T15:01:00Z').getTime(),
     closed: new Date('2026-05-26T16:53:00Z').getTime(),
-    pnl: 2400, result:'WIN' }
+    pnl: 2400, result:'WIN' },
+  { id:15, coin:'BTC', side:'LONG', size:63000, lev:1, entry:63000, exit:63200,
+    opened: new Date('2026-06-04T00:32:00Z').getTime(),
+    closed: new Date('2026-06-05T06:19:00Z').getTime(),
+    pnl: 200, result:'WIN' },
+  { id:16, coin:'BTC', side:'LONG', size:62500, lev:1, entry:62500, exit:63200,
+    opened: new Date('2026-06-04T12:58:00Z').getTime(),
+    closed: new Date('2026-06-05T06:19:00Z').getTime(),
+    pnl: 700, result:'WIN' }
 ];
 
 const activeTrades = [
   { id:14, coin:'BTC', side:'LONG', size:132000, lev:1, entry:66000,
-    opened: new Date('2026-06-03T04:37:00Z').getTime() },
-  { id:15, coin:'BTC', side:'LONG', size:63000, lev:1, entry:63000,
-    opened: new Date('2026-06-04T00:32:00Z').getTime() },
-  { id:16, coin:'BTC', side:'LONG', size:62500, lev:1, entry:62500,
-    opened: new Date('2026-06-04T12:58:00Z').getTime() }
+    opened: new Date('2026-06-03T04:37:00Z').getTime() }
 ];
 let prices = {};
 
