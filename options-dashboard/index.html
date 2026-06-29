@@ -148,7 +148,7 @@
   <div class="topbar">
     <div>
       <h1>brainTrade Options Dashboard</h1>
-      <div class="subtitle">Options income ledger · delayed bid/ask tracking · capital $138,000 · 50% margin model</div>
+      <div class="subtitle">Options income ledger · delayed bid/ask tracking · capital $138,000 · cash-secured, no margin</div>
       <nav class="tab-nav" aria-label="Fund dashboard tabs">
         <a class="tab-link" href="../">Fund</a>
         <a class="tab-link active" href="./">Options</a>
@@ -187,7 +187,7 @@
   <div class="risk" id="risk"></div>
 
   <div class="note">
-    Quotes are delayed public market data. P&L is marked to option mid when bid/ask exists. Close P&L assumes buying back short options at ask, or selling long options at bid. Margin usage is modeled at 50% of assignment notional per instruction; broker house margin can differ intraday.
+    Quotes are delayed public market data. P&L is marked to option mid when bid/ask exists. Close P&L assumes buying back short options at ask, or selling long options at bid. Short puts are modeled cash-secured with full assignment collateral reserved and no margin.
   </div>
 </div>
 
@@ -247,20 +247,20 @@ function render(tradesData, quotesData) {
   const trades = tradesData.trades.filter(t => t.status === 'open');
   const rows = trades.map(t => ({ trade: t, quote: quotesData.quotes[t.symbol], calc: calcTrade(t, quotesData.quotes[t.symbol]) }));
   const capital = Number(tradesData.capital);
-  const marginRate = Number(tradesData.marginRate ?? 0.3);
+  const collateralRate = Number(tradesData.collateralRate ?? 1);
   const totalMid = rows.reduce((s, r) => s + r.calc.pnlMid, 0);
   const totalClose = rows.reduce((s, r) => s + r.calc.pnlClose, 0);
   const totalCredit = rows.reduce((s, r) => s + Math.max(0, r.calc.entryCredit), 0);
   const assignment = rows.reduce((s, r) => s + r.calc.assignmentNotional, 0);
-  const marginRequired = assignment * marginRate;
-  const buyingPowerFree = capital - marginRequired;
+  const collateralRequired = assignment * collateralRate;
+  const buyingPowerFree = capital - collateralRequired;
   const maxLoss = rows.reduce((s, r) => s + (Number.isFinite(r.calc.maxLoss) ? r.calc.maxLoss : 0), 0);
 
   document.getElementById('summary').innerHTML = [
     card('Capital', fmtUsd(capital), 'Allocated options capital'),
     card('Open P&L', fmtUsd(totalMid), fmtUsd(totalClose) + ' close estimate', cls(totalMid)),
     card('Premium Collected', fmtUsd(totalCredit), fmtUsd(totalCredit / capital * 100, 2) + ' of capital', 'blue'),
-    card('Margin Used', fmtUsd(marginRequired), fmtUsd(buyingPowerFree) + ' buying power free', buyingPowerFree >= 0 ? 'green' : 'red')
+    card('Cash Reserved', fmtUsd(collateralRequired), fmtUsd(buyingPowerFree) + ' buying power free', buyingPowerFree >= 0 ? 'green' : 'red')
   ].join('');
 
   document.getElementById('trade-rows').innerHTML = rows.map(({ trade: t, calc: c }) => {
@@ -283,7 +283,7 @@ function render(tradesData, quotesData) {
   document.getElementById('risk').innerHTML = [
     card('Max Profit', fmtUsd(totalCredit), 'If short options expire worthless', 'green'),
     card('Assignment Exposure', fmtUsd(assignment), fmtUsd(assignment / capital * 100, 1) + ' gross notional vs capital', 'yellow'),
-    card('Margin Cushion', fmtUsd(buyingPowerFree), fmtNum(marginRate * 100, 0) + '% margin requirement', buyingPowerFree >= 0 ? 'green' : 'red')
+    card('Cash Cushion', fmtUsd(buyingPowerFree), fmtNum(collateralRate * 100, 0) + '% collateral, no margin', buyingPowerFree >= 0 ? 'green' : 'red')
   ].join('');
 
   const asOf = quotesData.asOf ? new Date(quotesData.asOf) : new Date();

@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-06-29T07:24:50.474Z",
+  "asOf": "2026-06-29T07:35:18.687Z",
   "source": "Nasdaq delayed",
   "delayNotice": "Public delayed quotes. Refresh cadence depends on GitHub Actions schedule and data provider availability.",
   "quotes": {
