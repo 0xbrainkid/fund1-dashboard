@@ -163,7 +163,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <div class="stats-scroll">
   <div class="pill">
     <div class="pill-label">Trades</div>
-    <div class="pill-value" id="total-trades">19</div>
+    <div class="pill-value" id="total-trades">20</div>
     <div class="pill-sub" id="trades-sub">17 closed</div>
   </div>
   <div class="pill">
@@ -173,8 +173,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   </div>
   <div class="pill">
     <div class="pill-label">Active</div>
-    <div class="pill-value" id="active-trades">2</div>
-    <div class="pill-sub" id="active-exposure">$190,500 exposed</div>
+    <div class="pill-value" id="active-trades">3</div>
+    <div class="pill-sub" id="active-exposure">$253,000 exposed</div>
   </div>
   <div class="pill">
     <div class="pill-label">Ann. Return</div>
@@ -365,7 +365,9 @@ const activeTrades = [
   { id:14, coin:'BTC', side:'LONG', size:132000, lev:1, entry:66000,
     opened: new Date('2026-06-03T04:37:00Z').getTime() },
   { id:19, coin:'BTC', side:'LONG', size:58500, lev:1, entry:58500,
-    opened: new Date('2026-06-28T21:15:00Z').getTime() }
+    opened: new Date('2026-06-28T21:15:00Z').getTime() },
+  { id:20, coin:'BTC', side:'LONG', size:62500, lev:1, entry:62500,
+    opened: new Date('2026-07-09T07:03:00Z').getTime() }
 ];
 let prices = {};
 
