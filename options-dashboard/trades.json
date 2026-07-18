@@ -16,8 +16,15 @@
       "strike": 1050,
       "premium": 53,
       "openedAt": "2026-06-28T21:27:00Z",
-      "status": "open",
-      "notes": "1x sell put on MU Jul 17 1050, premium 53. Cash-secured; no margin model."
+      "status": "closed",
+      "closedAt": "2026-07-17T20:00:00Z",
+      "assignmentPrice": 1050,
+      "assignedShares": 100,
+      "stockSalePrice": 848.95,
+      "stockSoldAt": "2026-07-17T20:00:00Z",
+      "realizedPnl": -14805,
+      "closeReason": "Expired ITM, assigned 100 MU shares at $1,050, then sold at $848.95. No MU shares retained.",
+      "notes": "1x sell put on MU Jul 17 1050, premium 53. Cash-secured; assigned and immediately sold at July 17 close."
     }
   ]
 }

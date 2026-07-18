@@ -119,6 +119,7 @@
   }
   .tag.short { color: var(--yellow); background: var(--yellow-bg); border: 1px solid rgba(250,204,21,.22); }
   .tag.open { color: var(--green); background: var(--green-bg); border: 1px solid rgba(0,210,106,.22); }
+  .tag.closed { color: var(--red); background: var(--red-bg); border: 1px solid rgba(255,71,87,.22); }
   .risk {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -188,6 +189,25 @@
     </table>
   </div>
 
+  <div class="section-title">Closed Option Trades</div>
+  <div class="panel">
+    <table>
+      <thead>
+        <tr>
+          <th>Trade</th>
+          <th>Qty</th>
+          <th>Entry Credit</th>
+          <th>Assignment</th>
+          <th>Stock Sale</th>
+          <th>Realized P&L</th>
+          <th>Closed</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="closed-rows"></tbody>
+    </table>
+  </div>
+
   <div class="section-title">Risk</div>
   <div class="risk" id="risk"></div>
 
@@ -244,12 +264,24 @@ function calcTrade(t, q) {
   return { opt, bid, ask, last, mark, closeMark, entryCredit, pnlMid, pnlClose, assignmentNotional, maxProfit, maxLoss, breakeven, stock, moneyness, dte: dte(t.expiry) };
 }
 
+function realizedPnl(t) {
+  if (Number.isFinite(Number(t.realizedPnl))) return Number(t.realizedPnl);
+  const contracts = Number(t.quantity);
+  const mult = Number(t.multiplier || 100);
+  const premium = Number(t.premium) * contracts * mult;
+  const assignment = Number(t.assignmentPrice ?? t.strike) * contracts * mult;
+  const sale = Number(t.stockSalePrice) * Number(t.assignedShares ?? contracts * mult);
+  if (Number.isFinite(sale) && Number.isFinite(assignment)) return premium + sale - assignment;
+  return 0;
+}
+
 function card(label, value, sub, klass = '') {
   return '<div class="card"><div class="label">' + label + '</div><div class="value ' + klass + '">' + value + '</div><div class="sub">' + sub + '</div></div>';
 }
 
 function render(tradesData, quotesData) {
   const trades = tradesData.trades.filter(t => t.status === 'open');
+  const closedTrades = tradesData.trades.filter(t => t.status === 'closed');
   const rows = trades.map(t => ({ trade: t, quote: quotesData.quotes[t.symbol], calc: calcTrade(t, quotesData.quotes[t.symbol]) }));
   const capital = Number(tradesData.capital);
   const collateralRate = Number(tradesData.collateralRate ?? 1);
@@ -260,15 +292,17 @@ function render(tradesData, quotesData) {
   const collateralRequired = assignment * collateralRate;
   const buyingPowerFree = capital - collateralRequired;
   const maxLoss = rows.reduce((s, r) => s + (Number.isFinite(r.calc.maxLoss) ? r.calc.maxLoss : 0), 0);
+  const realized = closedTrades.reduce((s, t) => s + realizedPnl(t), 0);
 
   document.getElementById('summary').innerHTML = [
     card('Capital', fmtUsd(capital), 'Allocated options capital'),
     card('Open P&L', fmtUsd(totalMid), fmtUsd(totalClose) + ' close estimate', cls(totalMid)),
+    card('Realized P&L', fmtUsd(realized), 'Closed options ledger', cls(realized)),
     card('Premium Collected', fmtUsd(totalCredit), fmtUsd(totalCredit / capital * 100, 2) + ' of capital', 'blue'),
     card('Cash Reserved', fmtUsd(collateralRequired), fmtUsd(buyingPowerFree) + ' buying power free', buyingPowerFree >= 0 ? 'green' : 'red')
   ].join('');
 
-  document.getElementById('trade-rows').innerHTML = rows.map(({ trade: t, calc: c }) => {
+  document.getElementById('trade-rows').innerHTML = rows.length ? rows.map(({ trade: t, calc: c }) => {
     const spread = Number.isFinite(c.bid) && Number.isFinite(c.ask) ? fmtUsd(c.bid, 2) + ' / ' + fmtUsd(c.ask, 2) : '—';
     const status = c.moneyness >= 0 ? '<span class="tag open">OTM</span>' : '<span class="tag short">ITM</span>';
     return '<tr>' +
@@ -283,7 +317,28 @@ function render(tradesData, quotesData) {
       '<td>' + c.dte + '</td>' +
       '<td>' + status + '</td>' +
     '</tr>';
-  }).join('');
+  }).join('') : '<tr><td colspan="10"><span class="sub">No open option trades.</span></td></tr>';
+
+  document.getElementById('closed-rows').innerHTML = closedTrades.length ? closedTrades.map(t => {
+    const contracts = Number(t.quantity);
+    const mult = Number(t.multiplier || 100);
+    const shares = Number(t.assignedShares ?? contracts * mult);
+    const entryCredit = Number(t.premium) * contracts * mult;
+    const assignmentPrice = Number(t.assignmentPrice ?? t.strike);
+    const salePrice = Number(t.stockSalePrice);
+    const pnl = realizedPnl(t);
+    const closedAt = t.closedAt ? new Date(t.closedAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    return '<tr>' +
+      '<td><strong>' + t.symbol + ' ' + t.expiry + ' ' + fmtNum(t.strike, 0) + 'P</strong><br><span class="sub"><span class="tag short">SHORT PUT</span> ' + (t.closeReason || '') + '</span></td>' +
+      '<td>' + t.quantity + '</td>' +
+      '<td class="green">' + fmtUsd(entryCredit) + '</td>' +
+      '<td>' + shares + ' @ ' + fmtUsd(assignmentPrice, 2) + '</td>' +
+      '<td>' + shares + ' @ ' + fmtUsd(salePrice, 2) + '</td>' +
+      '<td class="' + cls(pnl) + '"><strong>' + fmtUsd(pnl) + '</strong></td>' +
+      '<td>' + closedAt + '</td>' +
+      '<td><span class="tag closed">CLOSED</span></td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan="8"><span class="sub">No closed option trades.</span></td></tr>';
 
   document.getElementById('risk').innerHTML = [
     card('Max Profit', fmtUsd(totalCredit), 'If short options expire worthless', 'green'),
