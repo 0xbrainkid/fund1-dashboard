@@ -3,36 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Options Dashboard</title>
+<title>brainAI Fund Options</title>
 <meta http-equiv="refresh" content="300">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
   :root {
-    --bg: #0a0e17;
-    --panel: #131a2b;
-    --panel2: #182035;
-    --border: rgba(255,255,255,0.06);
-    --text: #f0f2f5;
-    --muted: #5a6478;
-    --green: #00d26a;
-    --green-bg: rgba(0,210,106,0.1);
-    --red: #ff4757;
-    --red-bg: rgba(255,71,87,0.1);
+    --bg: #0A0A0F;
+    --panel: #12121A;
+    --panel2: #161620;
+    --border: #1E1E2E;
+    --border2: #2A2A3C;
+    --text: #ECECF4;
+    --muted: #9A9AB0;
+    --dim: #5A5A70;
+    --green: #7FFF00;
+    --green-bg: rgba(127,255,0,0.1);
+    --red: #FF5C7A;
+    --red-bg: rgba(255,92,122,0.1);
     --yellow: #facc15;
     --yellow-bg: rgba(250,204,21,0.1);
     --blue: #4facfe;
     --cyan: #23c9d3;
-    --purple: #a855f7;
+    --purple: #9945FF;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --display:'Space Grotesk','Helvetica Neue',Arial,sans-serif;
+    --serif:'Instrument Serif',Georgia,serif;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--display);
     font-size: 14px;
   }
-  .shell { max-width: 1280px; margin: 0 auto; padding: 18px; }
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; background:linear-gradient(180deg,rgba(153,69,255,.08),transparent 300px),repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 1px,transparent 1px 96px); opacity:.55; }
+  .shell { max-width: 1180px; margin: 0 auto; padding: 18px; position:relative; z-index:1; }
   .topbar {
     display: flex;
     justify-content: space-between;
@@ -41,10 +47,12 @@
     padding: 8px 0 18px;
     border-bottom: 1px solid var(--border);
   }
-  h1 { margin: 0; font-size: 22px; letter-spacing: 0; font-weight: 900; background: linear-gradient(135deg, var(--purple), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .subtitle { margin-top: 4px; color: var(--muted); font-size: 13px; }
-  .status { text-align: right; color: var(--muted); font-size: 12px; line-height: 1.5; }
-  .live { color: var(--green); font-weight: 800; }
+  h1 { margin: 0; font-size: 0; letter-spacing: 0; font-weight: 700; }
+  h1::before { content:'brain'; font-family:var(--mono); font-size:18px; font-weight:700; letter-spacing:-.05em; color:#F0F0F5; }
+  h1::after { content:'AI Options'; font-family:var(--serif); font-style:italic; font-size:24px; font-weight:400; color:var(--purple); margin-left:2px; letter-spacing:-.02em; }
+  .subtitle { margin-top: 7px; color: var(--muted); font-family:var(--mono); font-size: 11px; line-height:1.55; }
+  .status { text-align: right; color: var(--muted); font-family:var(--mono); font-size: 11px; line-height: 1.5; }
+  .live { color: var(--green); font-weight: 800; letter-spacing:.12em; }
   .tab-nav {
     display: inline-grid;
     grid-template-columns: 1fr 1fr;
@@ -52,25 +60,28 @@
     margin-top: 12px;
     padding: 4px;
     min-width: 220px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(18,18,26,.78);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 8px;
   }
   .tab-link {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 32px;
-    border-radius: 9px;
+    border-radius: 6px;
     color: var(--muted);
     text-decoration: none;
-    font-size: 12px;
+    font-family:var(--mono);
+    font-size: 10px;
     font-weight: 850;
+    letter-spacing:.12em;
+    text-transform:uppercase;
   }
   .tab-link.active {
     color: var(--text);
-    background: var(--panel2);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    background: rgba(153,69,255,.14);
+    box-shadow: inset 0 0 0 1px rgba(153,69,255,.42);
   }
   .tab-link:not(.active):hover { color: var(--text); background: rgba(255,255,255,.04); }
   .grid {
@@ -80,13 +91,13 @@
     margin-top: 18px;
   }
   .card, .panel {
-    background: linear-gradient(145deg, var(--panel), var(--panel2));
+    background: rgba(18,18,26,.84);
     border: 1px solid var(--border);
     border-radius: 8px;
   }
   .card { padding: 16px; min-height: 104px; }
-  .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 800; }
-  .value { margin-top: 8px; font-size: 26px; font-weight: 850; letter-spacing: 0; }
+  .label { color: var(--muted); font-family:var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .16em; font-weight: 800; }
+  .value { margin-top: 8px; font-size: 26px; font-weight: 700; letter-spacing: -.04em; }
   .sub { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.45; }
   .green { color: var(--green); }
   .red { color: var(--red); }
@@ -96,7 +107,8 @@
   .section-title {
     margin: 24px 0 10px;
     color: var(--muted);
-    font-size: 12px;
+    font-family:var(--mono);
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: .08em;
     font-weight: 850;
@@ -105,15 +117,16 @@
   table { width: 100%; border-collapse: collapse; }
   th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
   th:first-child, td:first-child { text-align: left; }
-  th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 800; background: rgba(255,255,255,.02); }
+  th { color: var(--muted); font-family:var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; background: rgba(255,255,255,.02); }
   tr:last-child td { border-bottom: 0; }
   .tag {
     display: inline-flex;
     align-items: center;
     height: 24px;
     padding: 0 9px;
-    border-radius: 999px;
-    font-size: 11px;
+    border-radius: 6px;
+    font-family:var(--mono);
+    font-size: 10px;
     font-weight: 850;
     letter-spacing: .02em;
   }
@@ -132,9 +145,12 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--muted);
+    font-family:var(--mono);
+    font-size:12px;
     line-height: 1.55;
     background: rgba(255,255,255,.025);
   }
+  .app-footer { max-width:1180px; margin:0 auto; text-align:center; padding:20px 16px 10px; color:var(--muted); font-family:var(--mono); font-size:10px; line-height:1.6; }
   @media (max-width: 960px) {
     .grid, .risk { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .panel { overflow-x: auto; }
@@ -214,6 +230,9 @@
   <div class="note">
     Quotes are delayed public market data. P&L is marked to option mid when bid/ask exists. Close P&L assumes buying back short options at ask, or selling long options at bid. Short puts are modeled cash-secured with full assignment collateral reserved and no margin.
   </div>
+  <div class="app-footer">
+    brainAI Fund Options · Quotes via delayed public market data
+  </div>
 </div>
 
 <script>
@@ -289,13 +308,14 @@ function render(tradesData, quotesData) {
   const totalClose = rows.reduce((s, r) => s + r.calc.pnlClose, 0);
   const totalCredit = rows.reduce((s, r) => s + Math.max(0, r.calc.entryCredit), 0);
   const assignment = rows.reduce((s, r) => s + r.calc.assignmentNotional, 0);
-  const collateralRequired = assignment * collateralRate;
-  const buyingPowerFree = capital - collateralRequired;
-  const maxLoss = rows.reduce((s, r) => s + (Number.isFinite(r.calc.maxLoss) ? r.calc.maxLoss : 0), 0);
   const realized = closedTrades.reduce((s, t) => s + realizedPnl(t), 0);
+  const accountEquity = capital + realized;
+  const collateralRequired = assignment * collateralRate;
+  const buyingPowerFree = accountEquity - collateralRequired;
+  const maxLoss = rows.reduce((s, r) => s + (Number.isFinite(r.calc.maxLoss) ? r.calc.maxLoss : 0), 0);
 
   document.getElementById('summary').innerHTML = [
-    card('Capital', fmtUsd(capital), 'Allocated options capital'),
+    card('Account Equity', fmtUsd(accountEquity), fmtUsd(capital) + ' starting capital'),
     card('Open P&L', fmtUsd(totalMid), fmtUsd(totalClose) + ' close estimate', cls(totalMid)),
     card('Realized P&L', fmtUsd(realized), 'Closed options ledger', cls(realized)),
     card('Premium Collected', fmtUsd(totalCredit), fmtUsd(totalCredit / capital * 100, 2) + ' of capital', 'blue'),
