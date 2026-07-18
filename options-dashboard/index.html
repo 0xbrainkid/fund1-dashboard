@@ -28,47 +28,62 @@
     --mono:'JetBrains Mono',ui-monospace,monospace;
     --display:'Space Grotesk','Helvetica Neue',Arial,sans-serif;
     --serif:'Instrument Serif',Georgia,serif;
+    --radius: 8px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
-  * { box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    margin: 0;
     background: var(--bg);
     color: var(--text);
     font-family: var(--display);
     font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: calc(18px + var(--safe-top)) 18px calc(24px + var(--safe-bottom));
   }
   body::before { content:''; position:fixed; inset:0; pointer-events:none; background:linear-gradient(180deg,rgba(153,69,255,.08),transparent 300px),repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 1px,transparent 1px 96px); opacity:.55; }
-  .shell { max-width: 1180px; margin: 0 auto; padding: 18px; position:relative; z-index:1; }
-  .topbar {
+  .shell { max-width: 1180px; margin: 0 auto; position:relative; z-index:1; }
+  .app-header {
+    max-width: 1180px;
+    margin: 0 auto 10px;
+    min-height: 58px;
+    padding: 0 2px 12px;
     display: flex;
     justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-    padding: 8px 0 18px;
-    border-bottom: 1px solid var(--border);
+    align-items: center;
+    border-bottom:1px solid var(--border);
+    position:relative;
+    z-index:1;
   }
-  h1 { margin: 0; font-size: 0; letter-spacing: 0; font-weight: 700; }
-  h1::before { content:'brain'; font-family:var(--mono); font-size:18px; font-weight:700; letter-spacing:-.05em; color:#F0F0F5; }
-  h1::after { content:'AI Options'; font-family:var(--serif); font-style:italic; font-size:24px; font-weight:400; color:var(--purple); margin-left:2px; letter-spacing:-.02em; }
-  .subtitle { margin-top: 7px; color: var(--muted); font-family:var(--mono); font-size: 11px; line-height:1.55; }
-  .status { text-align: right; color: var(--muted); font-family:var(--mono); font-size: 11px; line-height: 1.5; }
-  .live { color: var(--green); font-weight: 800; letter-spacing:.12em; }
+  .app-title { font-size: 18px; font-weight: 700; display: flex; align-items: baseline; gap: 10px; letter-spacing:-.02em; }
+  .app-title .skull { display:none; }
+  .app-title .name { color: var(--text); font-size:0; }
+  .app-title .name::before { content:'brain'; font-family:var(--mono); font-size:18px; font-weight:700; letter-spacing:-.05em; color:#F0F0F5; }
+  .app-title .name::after { content:'AI'; font-family:var(--serif); font-style:italic; font-size:23px; line-height:1; color:var(--purple); margin-left:2px; letter-spacing:-.02em; }
+  .app-title::after { content:'Fund1'; font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--dim); text-transform:uppercase; border-left:1px solid var(--border2); padding-left:10px; }
+  .live-badge { display: flex; align-items: center; gap: 7px; background: rgba(127,255,0,0.08); border:1px solid rgba(127,255,0,.22); padding: 7px 12px; border-radius: 999px; font-family:var(--mono); font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: .12em; }
+  .live-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
   .tab-nav {
-    display: inline-grid;
+    max-width:1180px;
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
-    margin-top: 12px;
+    margin: 0 auto 12px;
     padding: 4px;
-    min-width: 220px;
     background: rgba(18,18,26,.78);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius);
+    position:relative;
+    z-index:1;
   }
   .tab-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px;
+    min-height: 36px;
     border-radius: 6px;
     color: var(--muted);
     text-decoration: none;
@@ -84,6 +99,7 @@
     box-shadow: inset 0 0 0 1px rgba(153,69,255,.42);
   }
   .tab-link:not(.active):hover { color: var(--text); background: rgba(255,255,255,.04); }
+  .quote-line { max-width:1180px; margin: 0 auto 12px; color: var(--muted); font-family:var(--mono); font-size: 11px; line-height: 1.5; position:relative; z-index:1; }
   .grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -156,9 +172,9 @@
     .panel { overflow-x: auto; }
   }
   @media (max-width: 620px) {
-    .shell { padding: 14px; }
-    .topbar { display: block; }
-    .status { text-align: left; margin-top: 10px; }
+    body { padding-left: 12px; padding-right: 12px; }
+    .app-header { min-height: 52px; }
+    .app-title::after { font-size: 9px; padding-left: 8px; }
     .grid, .risk { grid-template-columns: 1fr; }
     .value { font-size: 23px; }
     th, td { padding: 10px 12px; }
@@ -166,22 +182,19 @@
 </style>
 </head>
 <body>
-<div class="shell">
-  <div class="topbar">
-    <div>
-      <h1>Options Dashboard</h1>
-      <div class="subtitle">Options income ledger · delayed bid/ask tracking · capital $138,000 · cash-secured, no margin</div>
-      <nav class="tab-nav" aria-label="Fund dashboard tabs">
-        <a class="tab-link" href="../">Fund</a>
-        <a class="tab-link active" href="./">Options</a>
-      </nav>
-    </div>
-    <div class="status">
-      <div><span class="live">● TRACKING</span></div>
-      <div id="quote-status">Loading quotes...</div>
-    </div>
-  </div>
+<div class="app-header">
+  <div class="app-title"><span class="skull">🧠</span> <span class="name">AI Fund</span></div>
+  <div class="live-badge">LIVE</div>
+</div>
 
+<nav class="tab-nav" aria-label="Fund dashboard tabs">
+  <a class="tab-link" href="../">Fund</a>
+  <a class="tab-link active" href="./">Options</a>
+</nav>
+
+<div class="quote-line" id="quote-status">Loading quotes...</div>
+
+<div class="shell">
   <div class="grid" id="summary"></div>
 
   <div class="section-title">Open Option Trades</div>
