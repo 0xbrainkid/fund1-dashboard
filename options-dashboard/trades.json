@@ -10,7 +10,7 @@
       "strategy": "Short Put",
       "optionType": "put",
       "side": "sell",
-      "quantity": 1,
+      "quantity": 3,
       "multiplier": 100,
       "expiry": "2026-07-17",
       "strike": 1050,
@@ -19,12 +19,12 @@
       "status": "closed",
       "closedAt": "2026-07-17T20:00:00Z",
       "assignmentPrice": 1050,
-      "assignedShares": 100,
+      "assignedShares": 300,
       "stockSalePrice": 848.95,
       "stockSoldAt": "2026-07-17T20:00:00Z",
-      "realizedPnl": -14805,
-      "closeReason": "Expired ITM, assigned 100 MU shares at $1,050, then sold at $848.95. No MU shares retained.",
-      "notes": "1x sell put on MU Jul 17 1050, premium 53. Cash-secured; assigned and immediately sold at July 17 close."
+      "realizedPnl": -44415,
+      "closeReason": "Expired ITM, assigned 300 MU shares at $1,050, then sold at $848.95. No MU shares retained.",
+      "notes": "3x sell put on MU Jul 17 1050, premium 53. Cash-secured; assigned and immediately sold at July 17 close."
     }
   ]
 }
